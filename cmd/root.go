@@ -50,6 +50,43 @@ var rootCmd = &cobra.Command{
 			}
 			fmt.Printf("%d %s", lineCount, path)
 		}
+
+		if cmd.Flags().Changed("words") {
+
+			fi, err := os.Open(path)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			defer fi.Close()
+
+			scanner := bufio.NewScanner(fi)
+			scanner.Split(bufio.ScanWords)
+			wordCount := 0
+			for scanner.Scan() {
+				wordCount++
+			}
+
+			fmt.Printf("%d %s", wordCount, path)
+		}
+
+		if cmd.Flags().Changed("chars") {
+
+			fi, err := os.Open(path)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			defer fi.Close()
+			reader := bufio.NewReader(fi)
+
+			fileContent, err := reader.ReadBytes(0) // bad for big files
+			if err != nil {
+				fmt.Println("Error reading the file", err)
+				os.Exit(1)
+			}
+			fmt.Printf("%d %s", len(fileContent), path)
+		}
 	},
 }
 
@@ -99,6 +136,8 @@ func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.Flags().StringVarP(&path, "count", "c", "", "Path to file")
 	rootCmd.Flags().StringVarP(&path, "lines", "l", "", "Path to file")
+	rootCmd.Flags().StringVarP(&path, "words", "w", "", "Path to file")
+	rootCmd.Flags().StringVarP(&path, "chars", "m", "", "Path to file")
 
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(sizeCmd)
